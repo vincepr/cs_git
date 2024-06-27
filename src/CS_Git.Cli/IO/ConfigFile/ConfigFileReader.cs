@@ -5,15 +5,16 @@ namespace CS_Git.Cli.IO.ConfigFile;
 internal class ConfigFileReader : IDisposable
 {
     private readonly System.IO.StreamReader _reader;
+    private readonly FileStream _stream;
 
-    public ConfigFileReader(string filePath)
+    internal ConfigFileReader(string filePath)
     {
-        using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read,
+        _stream = new FileStream(filePath, FileMode.Open, FileAccess.Read,
             FileShare.Read, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan);
-        _reader = new System.IO.StreamReader(stream);
+        _reader = new System.IO.StreamReader(_stream);
     }
     
-    public async IAsyncEnumerable<ConfigType> ParseElements()
+    internal async IAsyncEnumerable<ConfigType> ParseElements()
     {
         while (_reader.EndOfStream == false)
         {
@@ -32,11 +33,11 @@ internal class ConfigFileReader : IDisposable
 
     private ConfigType TryParseSection()
     {
-        if ((char)_reader.Peek() != '[') throw new UnreachableException();
+        if ((char)_reader.Read() != '[') throw new UnreachableException();
         var name = String.Empty;
         while (_reader.Peek() != ']')
         {
-            name += _reader.Read();
+            name += (char)_reader.Read();
             if (_reader.EndOfStream) throw new UnreachableException("no closing ']' found.");
         }
 
@@ -49,7 +50,7 @@ internal class ConfigFileReader : IDisposable
         var line = await _reader.ReadLineAsync();
         if (line is null) return null; // handle nothing to read
         
-        // handle comment - everything till newline gets ignored
+        // handle comment - everything after ';' until newline gets ignored
         var idx = line.IndexOf(';');
         if (idx != -1)
         {
@@ -79,5 +80,6 @@ internal class ConfigFileReader : IDisposable
     public void Dispose()
     {
         _reader.Dispose();
+        _stream.Dispose();
     }
 }

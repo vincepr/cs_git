@@ -4,7 +4,6 @@ namespace CS_Git.Cli.IO.ConfigFile;
 
 public static class ConfigFile
 {
-
     public static async Task<List<ConfigSection>> Parse(string filePath)
     {
         List<ConfigSection> sections = [];
@@ -12,6 +11,7 @@ public static class ConfigFile
         
         await foreach (var configType in reader.ParseElements())
         {
+            Console.WriteLine(configType);
             switch (configType)
             {
                 case ConfigType.Section section:

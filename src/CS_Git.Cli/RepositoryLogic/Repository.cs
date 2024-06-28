@@ -1,6 +1,6 @@
-﻿using CS_Git.Cli.IO.ConfigFile;
+﻿using CS_Git.Cli.RepositoryLogic.ConfigFile;
 
-namespace CS_Git.Cli.Models;
+namespace CS_Git.Cli.RepositoryLogic;
 
 public class Repository
 {
@@ -21,18 +21,22 @@ public class Repository
         _conf = conf;
     }
 
+    /// <summary>
+    /// Read repository from provided path. Able to force a empty-object with force.
+    /// </summary>
+    /// <exception cref="Exception">No Git repository found.</exception>
     public static async Task<Repository> New(string path, bool force = false)
     {
         var worktree = path;
         var gitdir = Path.Combine(path, ".git");
-        if (!force && !Path.Exists(gitdir))
+        if (!force && !Directory.Exists(gitdir))
         {
-            throw new Exception($"Not a GIT repository {path}");
+            throw new Exception($"Not a Git repository in: {path}");
         }
 
         if (!force)
         {
-            var sections = await ConfigFile.Parse(Path.Combine(gitdir, "config"));
+            var sections = await ConfigFile.ConfigFile.Parse(Path.Combine(gitdir, "config"));
             return new Repository(
                 worktree: worktree,
                 gitdir: gitdir,
@@ -48,6 +52,12 @@ public class Repository
             conf: []);
     }
 
+    /// <summary>
+    /// Initialize new repository.
+    /// </summary>
+    /// <param name="path">absolute path where the '/.git' folder will be created in.</param>
+    /// <returns>The newly created <see cref="Repository"/>.</returns>
+    /// <exception cref="Exception">Various checks, to not overwrite existing repository might fail.</exception>
     public static async Task<Repository> Init(string path)
     {
         const string REPO_DEFAULT_CONFIG = """
@@ -56,36 +66,36 @@ public class Repository
                                                filemode = false
                                                bare = false
                                            """;
-        var repo = await New(path, true);
+        var tempRepo = await New(path, force: true);
         
-        if (Path.Exists(repo._worktree))
+        if (Path.Exists(tempRepo._worktree))
         {
-            if (!Directory.Exists(repo._worktree))
-                throw new Exception($"Not a directory: '{repo._worktree}'");
-            if (File.Exists(repo._gitdir))
-                throw new Exception($"Not a directory: '{repo._gitdir}'");
-            if (Directory.Exists(repo._gitdir) && Directory.EnumerateFiles(repo._gitdir).Count() > 1)
-                throw new Exception($".gitdir/ not empty: '{repo._gitdir}'");
+            if (!Directory.Exists(tempRepo._worktree))
+                throw new Exception($"Not a directory: '{tempRepo._worktree}'");
+            if (File.Exists(tempRepo._gitdir))
+                throw new Exception($"Not a directory: '{tempRepo._gitdir}'");
+            if (Directory.Exists(tempRepo._gitdir) && Directory.EnumerateFiles(tempRepo._gitdir).Count() > 1)
+                throw new Exception($".gitdir/ not empty: '{tempRepo._gitdir}'");
         }
         else
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(repo._worktree)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(tempRepo._worktree)!);
         }
 
         // initialize .gitdir folders:
-        repo.CreateRepoDir("branches");
-        repo.CreateRepoDir("objects");
-        repo.CreateRepoDir("refs", "tags");
-        repo.CreateRepoDir("refs", "heads");
+        tempRepo.CreateRepoDir("branches");
+        tempRepo.CreateRepoDir("objects");
+        tempRepo.CreateRepoDir("refs", "tags");
+        tempRepo.CreateRepoDir("refs", "heads");
 
         await Task.WhenAll([
-            repo.CreateRepoFile(content: "Unnamed repository; edit this file 'description' to name the repository.\n" ,
+            tempRepo.CreateRepoFile(content: "Unnamed repository; edit this file 'description' to name the repository.\n" ,
                 path: "description"),
-            repo.CreateRepoFile(content: "ref: refs/heads/master\n", path: "HEAD"),
-            repo.CreateRepoFile(content: REPO_DEFAULT_CONFIG, path: "config"),
+            tempRepo.CreateRepoFile(content: "ref: refs/heads/master\n", path: "HEAD"),
+            tempRepo.CreateRepoFile(content: REPO_DEFAULT_CONFIG, path: "config"),
         ]);
         
-        return repo;
+        return await Repository.New(path);
     }
     
     /// <summary>
@@ -93,7 +103,7 @@ public class Repository
     /// </summary>
     /// <param name="startingPath">absolute path of directory where to start from.</param>
     /// <returns>absolute path to the project root.</returns>
-    /// <exception cref="Exception">Went up to root. But found no '/.git'</exception>
+    /// <exception cref="Exception">Went up to root. But found no '/.git'.</exception>
     public static string Find(string startingPath) =>
         FindRecursive(startingPath) ?? throw new Exception($"Unable to find '/.git' above path: {startingPath}");
 
@@ -109,13 +119,13 @@ public class Repository
         };
     }
 
-    public string RepoPath(params string[] parts)
+    private string RepoPath(params string[] parts)
     {
         if (parts.Length < 1) throw new ArgumentOutOfRangeException(nameof(parts));
         return parts.Aggregate(_gitdir, (current, part) => Path.Join(current, part));
     }
 
-    public DirectoryInfo CreateRepoDir(params string[] path)
+    private DirectoryInfo CreateRepoDir(params string[] path)
         => Directory.CreateDirectory(RepoPath(path));
 
     private StreamWriter CreateRepoFileWriter(params string[] path)
@@ -130,7 +140,7 @@ public class Repository
             FileShare.ReadWrite));
     }
 
-    public async Task CreateRepoFile(string content, params string[] path)
+    private async Task CreateRepoFile(string content, params string[] path)
     {
         await using var writer = CreateRepoFileWriter(path);
         await writer.WriteAsync(content);

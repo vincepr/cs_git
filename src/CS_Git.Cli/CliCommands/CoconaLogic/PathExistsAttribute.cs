@@ -1,7 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CS_Git.Cli.CliCommands;
+namespace CS_Git.Cli.CliCommands.CoconaLogic;
 
+/// <summary>
+/// Enforce that path exists on the file system.
+/// </summary>
 class PathExistsAttribute : ValidationAttribute
 {
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)

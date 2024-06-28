@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace CS_Git.Cli.IO.ConfigFile;
+namespace CS_Git.Cli.RepositoryLogic.ConfigFile;
 
 public static class ConfigFile
 {
@@ -19,7 +19,6 @@ public static class ConfigFile
                     break;
                 case ConfigType.SubSection subSection:
                     throw new UnreachableException("Unimplemented");
-                    break;
                 case ConfigType.Value value:
                     sections.Last().Elements.Add(new KeyValuePair<string, string>(value.Key, value.Val));
                     break;

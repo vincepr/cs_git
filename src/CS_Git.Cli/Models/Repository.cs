@@ -88,11 +88,16 @@ public class Repository
         return repo;
     }
     
-    // helper functions
     /// <summary>
     /// Recursively search trough parents till '.git' directory is identified. 
     /// </summary>
-    public static string? Find(string absolutePath)
+    /// <param name="startingPath">absolute path of directory where to start from.</param>
+    /// <returns>absolute path to the project root.</returns>
+    /// <exception cref="Exception">Went up to root. But found no '/.git'</exception>
+    public static string Find(string startingPath) =>
+        FindRecursive(startingPath) ?? throw new Exception($"Unable to find '/.git' above path: {startingPath}");
+
+    private static string? FindRecursive(string absolutePath)
     {
         if (Directory.Exists(absolutePath) && Directory.Exists(Path.Join(absolutePath, ".git")))
             return absolutePath;    // found .git folder
@@ -103,7 +108,7 @@ public class Repository
             var parentDirectory => Find(parentDirectory)    // recurse parentFolder
         };
     }
-    
+
     public string RepoPath(params string[] parts)
     {
         if (parts.Length < 1) throw new ArgumentOutOfRangeException(nameof(parts));

@@ -1,11 +1,11 @@
-﻿using CS_Git.Cli.RepositoryLogic.ConfigFile;
+﻿using CS_Git.Lib.RepositoryLogic.ConfigFile;
 
-namespace CS_Git.Cli.RepositoryLogic;
+namespace CS_Git.Lib.RepositoryLogic;
 
 public class Repository
 {
-    private readonly string _worktree;
-    private readonly string _gitdir;
+    public readonly string _worktree;
+    public readonly string _gitdir;
     private readonly string _gitVersion;
     private readonly IReadOnlyList<ConfigSection> _conf;
     
@@ -97,7 +97,15 @@ public class Repository
         
         return await Repository.New(path);
     }
-    
+
+    public static async Task<Repository> FindRecursiveAndRead(string path = ".") =>
+        path switch
+        {
+            "." => await New(Find(Directory.GetCurrentDirectory())),
+            var p => await New(Find(Path.GetFullPath(p)))
+        };
+
+
     /// <summary>
     /// Recursively search trough parents till '.git' directory is identified. 
     /// </summary>
@@ -109,7 +117,7 @@ public class Repository
 
     private static string? FindRecursive(string absolutePath)
     {
-        if (Directory.Exists(absolutePath) && Directory.Exists(Path.Join(absolutePath, ".git")))
+        if (Directory.Exists(absolutePath) && Directory.Exists(Path.Combine(absolutePath, ".git")))
             return absolutePath;    // found .git folder
 
         return  Path.GetDirectoryName(absolutePath) switch
@@ -122,7 +130,7 @@ public class Repository
     private string RepoPath(params string[] parts)
     {
         if (parts.Length < 1) throw new ArgumentOutOfRangeException(nameof(parts));
-        return parts.Aggregate(_gitdir, (current, part) => Path.Join(current, part));
+        return parts.Aggregate(_gitdir, (current, part) => Path.Combine(current, part));
     }
 
     private DirectoryInfo CreateRepoDir(params string[] path)

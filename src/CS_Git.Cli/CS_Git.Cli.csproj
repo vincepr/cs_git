@@ -11,4 +11,8 @@
       <PackageReference Include="Cocona.Lite" Version="2.2.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\CS_Git.Lib\CS_Git.Lib.csproj" />
+    </ItemGroup>
+
 </Project>

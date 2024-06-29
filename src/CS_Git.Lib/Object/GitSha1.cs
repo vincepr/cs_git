@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CS_Git.Cli.GitObj;
+namespace CS_Git.Lib.Object;
 
 public struct GitSha1
 {
@@ -21,6 +21,12 @@ public struct GitSha1
         var sha = Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(content)));
         ConstructorHelper(content, sha);
     }
+    
+    public GitSha1(string content)
+    {
+        var sha = Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(content)));
+        ConstructorHelper(content, sha);
+    }
 
     private void ConstructorHelper<T>(T data, string sha)
     {
@@ -32,11 +38,13 @@ public struct GitSha1
         FileName = sha[2..];
     }
 
-    public GitSha1(string content)
-    {
-        var sha = Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(content)));
-        ConstructorHelper(content, sha);
-    }
+    public static GitSha1 FromHexString(string shaHexString) =>
+        new()
+        {
+            FolderName = shaHexString[..2],
+            FileName = shaHexString[2..]
+        };
 
-    public override string ToString() => $"={FolderName}{FileName}";
+
+    public override string ToString() => $"{FolderName}{FileName}";
 }

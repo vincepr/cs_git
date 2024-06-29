@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace CS_Git.Cli.RepositoryLogic.ConfigFile;
+namespace CS_Git.Lib.RepositoryLogic.ConfigFile;
 
 public static class ConfigFile
 {

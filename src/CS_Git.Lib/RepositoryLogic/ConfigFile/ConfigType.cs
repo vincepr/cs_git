@@ -1,4 +1,4 @@
-﻿namespace CS_Git.Cli.RepositoryLogic.ConfigFile;
+﻿namespace CS_Git.Lib.RepositoryLogic.ConfigFile;
 
 internal record ConfigType
 {

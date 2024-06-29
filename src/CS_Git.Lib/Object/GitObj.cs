@@ -1,10 +1,9 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
-using CS_Git.Cli.GitObj;
-using CS_Git.Cli.RepositoryLogic;
+using CS_Git.Lib.RepositoryLogic;
 
-namespace CS_Git.Cli.Object;
+namespace CS_Git.Lib.Object;
 // place for object files is decided by it's SHA-1 hash:
 //      ./.git/objects/first 2 chars as folder name / rest of the chars as filename
 //      ./.git/objects/e6/73d1b7eaa0aa01b5bc2442d570a765bdaae751
@@ -64,8 +63,13 @@ public abstract record GitObj
 
         var content = await reader.ReadToEndAsync();
         
+#if !DEBUG 
         if (content.Length != expectedLen)
             throw new InvalidDataException($"Malformed object. Bad length. Expected {expectedLen}, got {content.Length}.");
+#endif
+#if DEBUG
+        if (content.Length != expectedLen) await Console.Error.WriteLineAsync($"Malformed object. Bad length. Expected {expectedLen}, got {content.Length}.");
+#endif
 
         return expectedType switch
         {
@@ -93,6 +97,7 @@ public record BlobGitObj(string Content) : GitObj
         await writer.WriteAsync(result);
         return sha;
     }
+    public override string ToString() => Content;
 }
 
 public record CommitGitObj(string Content) : GitObj
@@ -102,6 +107,7 @@ public record CommitGitObj(string Content) : GitObj
     {
         throw new NotImplementedException();
     }
+    public override string ToString() => Content;
 }
 
 public record TagGitObj(string Content) : GitObj
@@ -111,6 +117,7 @@ public record TagGitObj(string Content) : GitObj
     {
         throw new NotImplementedException();
     }
+    public override string ToString() => Content;
 }
 
 public record TreeGitObj(string Content) : GitObj
@@ -120,4 +127,5 @@ public record TreeGitObj(string Content) : GitObj
     {
         throw new NotImplementedException();
     }
+    public override string ToString() => Content;
 }

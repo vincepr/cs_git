@@ -1,11 +1,11 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using CS_Git.Lib.RepositoryLogic.ConfigFile;
 
-namespace CS_Git.Lib.Tests.IntegrationTests.TestFiles;
+namespace CS_Git.Lib.Tests.IntegrationTests.Testfiles;
 
 // ReSharper disable once UnusedType.Global
 // ReSharper disable once InconsistentNaming
-internal static class csharpfile_no_bom
+internal static class csharpfile_with_bom
 {
     private static List<ConfigSection> Dummyfile(string filePath)
     {

@@ -20,30 +20,5 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
-      
-    - name: DebuggingWhereMyFilesAre1
-      run: ls
-    - name: DebuggingWhereMyFilesAre2
-      run: ls /home/
-    - name: DebuggingWhereMyFilesAre2
-      run: ls /home/runner/
-    - name: DebuggingWhereMyFilesAre2
-      run: ls /home/runner/work/
-    - name: DebuggingWhereMyFilesAre2
-      run: ls /home/runner/work/cs_git/
-    - name: DebuggingWhereMyFilesAre2
-      run: ls /home/runner/work/cs_git/cs_git/
-    - name: DebuggingWhereMyFilesAre2
-      run: ls /home/runner/work/cs_git/cs_git/tests/
-    - name: DebuggingWhereMyFilesAre2
-      run: ls /home/runner/work/cs_git/cs_git/tests/CS_Git.Lib.Tests/
-    - name: DebuggingWhereMyFilesAre2
-      run: ls /home/runner/work/cs_git/cs_git/tests/CS_Git.Lib.Tests/IntegrationTests/
-    - name: DebuggingWhereMyFilesAre2
-      run: ls /home/runner/work/cs_git/cs_git/tests/CS_Git.Lib.Tests/IntegrationTests/Testfiles/
-    - name: DebuggingWhereMyFilesAre2
-      run: ls /home/runner/work/cs_git/cs_git/tests/CS_Git.Lib.Tests/IntegrationTests/Testfiles/codefile.py
-      
-      
     - name: Test
       run: dotnet test --no-build --verbosity normal

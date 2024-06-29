@@ -5,8 +5,10 @@ using NUnit.Framework;
 
 namespace CS_Git.Lib.Tests.IntegrationTests;
 
+[Parallelizable(ParallelScope.Self)]
 public class ObjectCreationTests
 {
+    private const string TestFilesPath = "../../../IntegrationTests/Testfiles/";
     private DirectoryInfo _tempSubdirectory = null!;
     private Repository _repo = null!;
 
@@ -24,13 +26,13 @@ public class ObjectCreationTests
     }
 
     [Test]
-    [TestCase("../../../IntegrationTests/Testfiles/", "codefile.py")]
-    [TestCase("../../../IntegrationTests/Testfiles/", "binaryfile")]
-    public async Task GitObj_Write_UsesShaAsFolderAndName(string basePath, string file)
+    [TestCase("codefile.py")]
+    [TestCase("binaryfile")]
+    public async Task GitObj_Write_UsesShaAsFolderAndName(string file)
     {
         // Arrange
         var absFilePath = Path.Combine(_tempSubdirectory.FullName, "file");
-        File.Copy(basePath + file, absFilePath);
+        File.Copy(TestFilesPath + file, absFilePath);
         
         // Act
         var sha = await HashObject(absFilePath);
@@ -41,14 +43,16 @@ public class ObjectCreationTests
     }
     
     [Test]
-    [TestCase("../../../IntegrationTests/Testfiles/", "binaryfile")]
-    [TestCase("../../../IntegrationTests/Testfiles/", "codefile.py")]
-    [TestCase("../../../IntegrationTests/Testfiles/", "jsonfile.json")]
-    public async Task GitObj_WriteThenRead_ProducesSameFile(string basePath, string file)
+    [TestCase("binaryfile")]
+    [TestCase("codefile.py")]
+    [TestCase("csharpfile_no_bom.cs")]
+    [TestCase("csharpfile_with_bom.cs")]
+    [TestCase("jsonfile.json")]
+    public async Task GitObj_WriteThenRead_ProducesSameString(string file)
     {
         // Arrange
         var absFilePath = Path.Combine(_tempSubdirectory.FullName, "file");
-        File.Copy(basePath + file, absFilePath);
+        File.Copy(TestFilesPath + file, absFilePath);
         
         // Act
         var sha = await HashObject(absFilePath);
@@ -59,6 +63,28 @@ public class ObjectCreationTests
         Assert.That(await File.ReadAllTextAsync(absFilePath, Encoding.UTF8), Is.EqualTo(((BlobGitObj)obj).Content));
     }
     
+    [Test]
+    [TestCase("binaryfile")]
+    [TestCase("codefile.py")]
+    [TestCase("csharpfile_no_bom.cs")]
+    [TestCase("csharpfile_with_bom.cs")]
+    [TestCase("jsonfile.json")]
+    public async Task GitObj_WriteThenRead_ProducesSameFile(string file)
+    {
+        // Arrange
+        var absFilePath = Path.Combine(_tempSubdirectory.FullName, "file");
+        File.Copy(TestFilesPath + file, absFilePath);
+        
+        // Act
+        var sha = await HashObject(absFilePath);
+        
+        // Assert
+        var obj = await CatFile(sha.ToString());
+        Assert.That(obj is BlobGitObj);
+        Assert.That(await File.ReadAllTextAsync(absFilePath, Encoding.UTF8), Is.EqualTo(((BlobGitObj)obj).Content));
+        var createdFile = await ObjToFile((BlobGitObj)obj, _repo);
+        Assert.That(File.ReadAllBytes(absFilePath), Is.EqualTo(File.ReadAllBytes(createdFile)));
+    }
     
     private async Task<GitSha1> HashObject(string absolutePath)
     {
@@ -68,4 +94,15 @@ public class ObjectCreationTests
 
     private async Task<GitObj> CatFile(string sha) =>
         await GitObj.Read(_repo, GitSha1.FromHexString(sha));
+
+    private async Task<string> ObjToFile(BlobGitObj obj, Repository repo)
+    {
+        string filepath = repo._worktree + "\\file.txt";
+        // TODO we should probably refactor to use bytes[] instead of string generally to get rid of encoding!
+        File.WriteAllText(filepath, obj.Content, Encoding.UTF8);
+        return filepath;
+
+
+    }
+        
 }

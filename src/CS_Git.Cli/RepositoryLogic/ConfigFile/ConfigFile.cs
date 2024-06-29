@@ -11,7 +11,9 @@ public static class ConfigFile
         
         await foreach (var configType in reader.ParseElements())
         {
-            Console.WriteLine(configType);
+            #if DEBUG
+            Console.WriteLine($"DEBUG-FLAG-{nameof(ConfigFile)}: {configType}");
+            #endif
             switch (configType)
             {
                 case ConfigType.Section section:

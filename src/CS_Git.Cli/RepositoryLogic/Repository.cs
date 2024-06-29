@@ -128,7 +128,8 @@ public class Repository
     private DirectoryInfo CreateRepoDir(params string[] path)
         => Directory.CreateDirectory(RepoPath(path));
 
-    private StreamWriter CreateRepoFileWriter(params string[] path)
+    
+    public Stream CreateRepoFileStreamWriter(params string[] path)
     {
         var resolvedPath = RepoPath(path);
         if (Directory.Exists(Path.GetDirectoryName(resolvedPath)) == false)
@@ -136,13 +137,25 @@ public class Repository
             Directory.CreateDirectory(Path.GetDirectoryName(resolvedPath)!);
         }
 
-        return new StreamWriter(File.Open(resolvedPath, FileMode.OpenOrCreate, FileAccess.ReadWrite,
-            FileShare.ReadWrite));
+        return File.Open(resolvedPath, FileMode.OpenOrCreate, FileAccess.ReadWrite,
+            FileShare.ReadWrite);
+    }
+    
+    public Stream CreateRepoFileStreamReadonly(params string[] path)
+    {
+        var resolvedPath = RepoPath(path);
+        if (Directory.Exists(Path.GetDirectoryName(resolvedPath)) == false)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(resolvedPath)!);
+        }
+
+        return new FileStream(resolvedPath, FileMode.Open, FileAccess.Read,
+            FileShare.Read, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan);
     }
 
     private async Task CreateRepoFile(string content, params string[] path)
     {
-        await using var writer = CreateRepoFileWriter(path);
+        await using var writer = new StreamWriter(CreateRepoFileStreamWriter(path));
         await writer.WriteAsync(content);
     }
 

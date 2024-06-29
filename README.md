@@ -5,3 +5,7 @@
 - `csgit init`
 - `csgit hash-object`
 - `csgit cat-file`
+
+## resources
+- https://wyag.thb.lt/
+- https://git-scm.com/docs/git-config#_syntax

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Cocona;
 
 namespace CS_Git.Cli.CliCommands.CoconaLogic;
@@ -18,5 +19,22 @@ public class DirectoryRequiredArgument : ICommandParameterSet
         OriginalInput = directory;
         directory ??= Directory.GetCurrentDirectory();
         AbsolutePath = Path.GetFullPath(directory);
+    }
+}
+
+/// <summary>
+/// Parameter used to be able to accept both (relativePath || absolutePath) -> automatically convert to (absolute-path).
+/// Is optional, default to ".".
+/// </summary>
+public class FileRequiredArgument : ICommandParameterSet
+{
+    public string AbsolutePath { get; init; }
+
+    public FileRequiredArgument([Argument(Description = "path to file.")] string file)
+    {
+        if (!File.Exists(file))
+            throw new FileNotFoundException($"File not found: '{file}'");
+        
+        AbsolutePath = Path.GetFullPath(file);
     }
 }

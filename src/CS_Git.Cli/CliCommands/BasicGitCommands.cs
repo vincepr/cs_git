@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using Cocona;
 using CS_Git.Cli.CliCommands.CoconaLogic;
-using CS_Git.Cli.Hashing;
+using CS_Git.Cli.GitObj;
+using CS_Git.Cli.Object;
 using CS_Git.Cli.RepositoryLogic;
 
 namespace CS_Git.Cli.CliCommands;
@@ -28,23 +30,23 @@ public class BasicGitCommands
     }
 
     [Command("hash-object", Description = "Convert existing file into a git object.")]
-    public async Task HashObject()
+    public async Task HashObject(FileRequiredArgument path)
     {
-        var directory = Directory.GetCurrentDirectory();
-        var AbsolutePath = Path.GetFullPath(directory);
-        var repo = await Repository.New(AbsolutePath);
-        var obj = new BlobGitObj("Helloworld\nwhatever;");
-        obj.Write(repo);
+        var repo = await Repository.New(Repository.Find(Directory.GetCurrentDirectory()));
+        var content = File.ReadAllText(path.AbsolutePath, Encoding.UTF8);
+        var obj = new BlobGitObj(content);
+        var sha = await obj.Write(repo);
+        Console.WriteLine($"created: '{sha.FolderName}/{sha.FileName}'");
     }
 
     [Command("cat-file", Description = "Write existing git object to the std-output.")]
-    public async Task CatFile()
+    public async Task CatFile(FileRequiredArgument path)
     {
         var directory = Directory.GetCurrentDirectory();
         var AbsolutePath = Path.GetFullPath(directory);
         var repo = await Repository.New(AbsolutePath);
         var sha1 = new GitSha1("0081dde56fdf7538f428fb1a2bcf8fd0df05ee7e");
         var sha2 = new GitSha1("0ac9faebed1ad25d38d0672c8fecd0bba4dcfa88");
-        await GitObj.Read(repo, sha2);
+        // await Object.GitObj.Read()
     }
 }

@@ -8,7 +8,7 @@ namespace CS_Git.Lib.Tests.IntegrationTests;
 [Parallelizable(ParallelScope.Self)]
 public class ObjectCreationTests
 {
-    private const string TestFilesPath = "../../../IntegrationTests/Testfiles/";
+    private static readonly string TestFilesPath = $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}IntegrationTests/Testfiles/";
     private DirectoryInfo _tempSubdirectory = null!;
     private Repository _repo = null!;
 
@@ -97,7 +97,7 @@ public class ObjectCreationTests
 
     private async Task<string> ObjToFile(BlobGitObj obj, Repository repo)
     {
-        string filepath = repo._worktree + "\\file.txt";
+        string filepath = repo._worktree + Path.DirectorySeparatorChar + "file.txt";
         // TODO we should probably refactor to use bytes[] instead of string generally to get rid of encoding!
         File.WriteAllText(filepath, obj.Content, Encoding.UTF8);
         return filepath;

@@ -21,6 +21,6 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: DebuggingWhereMyFilesAre
-      run: ls testfiles/mytest.json
+      run: ls 
     - name: Test
       run: dotnet test --no-build --verbosity normal

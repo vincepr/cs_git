@@ -8,8 +8,8 @@ namespace CS_Git.Lib.Tests.IntegrationTests;
 [Parallelizable(ParallelScope.Self)]
 public class ObjectCreationTests
 {
-    private static readonly char slash = Path.DirectorySeparatorChar;
-    private static readonly string TestFilesPath = $"..{slash}..{slash}..{slash}IntegrationTests{slash}Testfiles{slash}";
+    private static readonly char Slash = Path.DirectorySeparatorChar;
+    private static readonly string TestFilesPath = $"..{Slash}..{Slash}..{Slash}IntegrationTests{Slash}Testfiles{Slash}";
     private DirectoryInfo _tempSubdirectory = null!;
     private Repository _repo = null!;
 
@@ -68,7 +68,7 @@ public class ObjectCreationTests
     [TestCase("binaryfile")]
     [TestCase("codefile.py")]
     [TestCase("csharpfile_no_bom.cs")]
-    [TestCase("csharpfile_with_bom.cs")]
+    [TestCase("csharpfile_with_bom.cs")]    // TODO: even when this one should break it doesn't. Find out why
     [TestCase("jsonfile.json")]
     public async Task GitObj_WriteThenRead_ProducesSameFile(string file)
     {
@@ -83,7 +83,7 @@ public class ObjectCreationTests
         var obj = await CatFile(sha.ToString());
         Assert.That(obj is BlobGitObj);
         Assert.That(await File.ReadAllTextAsync(absFilePath, Encoding.UTF8), Is.EqualTo(((BlobGitObj)obj).Content));
-        var createdFile = await ObjToFile((BlobGitObj)obj, _repo);
+        var createdFile = ObjToFile((BlobGitObj)obj, _repo);
         Assert.That(File.ReadAllBytes(absFilePath), Is.EqualTo(File.ReadAllBytes(createdFile)));
     }
     
@@ -96,14 +96,11 @@ public class ObjectCreationTests
     private async Task<GitObj> CatFile(string sha) =>
         await GitObj.Read(_repo, GitSha1.FromHexString(sha));
 
-    private async Task<string> ObjToFile(BlobGitObj obj, Repository repo)
+    private string ObjToFile(BlobGitObj obj, Repository repo)
     {
-        string filepath = repo._worktree + slash + "file.txt";
+        string filepath = repo._worktree + Slash + "file.txt";
         // TODO we should probably refactor to use bytes[] instead of string generally to get rid of encoding!
         File.WriteAllText(filepath, obj.Content, Encoding.UTF8);
         return filepath;
-
-
     }
-        
 }

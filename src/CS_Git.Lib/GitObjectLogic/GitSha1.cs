@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CS_Git.Lib.Object;
+namespace CS_Git.Lib.GitObjectLogic;
 
 public struct GitSha1
 {

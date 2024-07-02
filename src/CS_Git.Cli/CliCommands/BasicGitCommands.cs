@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using System.Text;
 using Cocona;
 using CS_Git.Cli.CliCommands.CoconaLogic;
-using CS_Git.Lib.Object;
+using CS_Git.Lib.GitObjectLogic;
+using CS_Git.Lib.GitObjectLogic.ObjTypes;
 using CS_Git.Lib.RepositoryLogic;
 
 namespace CS_Git.Cli.CliCommands;
@@ -16,6 +16,7 @@ public class BasicGitCommands
     {
         var found = Repository.Find(pathToAdd.AbsolutePath);
         var repo = await Repository.New(found);
+        Console.WriteLine(repo);
         
         throw new UnreachableException("Unimplemented");
     }
@@ -32,8 +33,8 @@ public class BasicGitCommands
     public async Task HashObject(FileRequiredArgument path)
     {
         var repo = await Repository.FindRecursiveAndRead();
-        var content = await File.ReadAllTextAsync(path.AbsolutePath, Encoding.UTF8);
-        var obj = new BlobGitObj(content);
+        var content = await File.ReadAllBytesAsync(path.AbsolutePath);
+        var obj = new BlobBaseGitObj(content);
         var sha = await obj.Write(repo);
         Console.WriteLine($"created: '{sha.FolderName}/{sha.FileName}'");
     }
@@ -42,7 +43,7 @@ public class BasicGitCommands
     public async Task CatFile([Argument]string sha)
     {
         var repo = await Repository.FindRecursiveAndRead();
-        var obj = await GitObj.Read(repo, GitSha1.FromHexString(sha));
+        var obj = await BaseGitObj.Read(repo, GitSha1.FromHexString(sha));
         Console.WriteLine(obj);
     }
 }

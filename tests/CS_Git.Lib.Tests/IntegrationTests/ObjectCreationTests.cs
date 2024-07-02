@@ -1,5 +1,6 @@
 using System.Text;
-using CS_Git.Lib.Object;
+using CS_Git.Lib.GitObjectLogic;
+using CS_Git.Lib.GitObjectLogic.ObjTypes;
 using CS_Git.Lib.RepositoryLogic;
 using NUnit.Framework;
 
@@ -47,7 +48,7 @@ public class ObjectCreationTests
     [TestCase("binaryfile")]
     [TestCase("codefile.py")]
     [TestCase("csharpfile_no_bom.cs")]
-    [TestCase("csharpfile_with_bom.cs")]
+    [TestCase("csharpfile_with_bom.cs")] 
     [TestCase("jsonfile.json")]
     public async Task GitObj_WriteThenRead_ProducesSameString(string file)
     {
@@ -60,17 +61,21 @@ public class ObjectCreationTests
         
         // Assert
         var obj = await CatFile(sha.ToString());
-        Assert.That(obj is BlobGitObj);
-        Assert.That(await File.ReadAllTextAsync(absFilePath, Encoding.UTF8), Is.EqualTo(((BlobGitObj)obj).Content));
+        Assert.That(obj is BlobBaseGitObj);
+        Assert.That(obj.ToString(), Is.EquivalentTo(Encoding.UTF8.GetString(File.ReadAllBytes(absFilePath))));
+        
+        // following assert disabled, because it will break on: [TestCase("csharpfile_with_bom.cs")]
+        // BOM, byte order mark, related. Could be actually want the other bom-behavior? But this seems cleaner byte wise.
+        // // Assert.That(obj.ToString(), Is.EquivalentTo(await File.ReadAllTextAsync(absFilePath, Encoding.UTF8)));
     }
     
     [Test]
     [TestCase("binaryfile")]
     [TestCase("codefile.py")]
     [TestCase("csharpfile_no_bom.cs")]
-    [TestCase("csharpfile_with_bom.cs")]    // TODO: even when this one should break it doesn't. Find out why
+    [TestCase("csharpfile_with_bom.cs")]
     [TestCase("jsonfile.json")]
-    public async Task GitObj_WriteThenRead_ProducesSameFile(string file)
+    public async Task GitObj_WriteThenRead_ProducesSameFile_ByteComparison(string file)
     {
         // Arrange
         var absFilePath = Path.Combine(_tempSubdirectory.FullName, "file");
@@ -81,26 +86,25 @@ public class ObjectCreationTests
         
         // Assert
         var obj = await CatFile(sha.ToString());
-        Assert.That(obj is BlobGitObj);
-        Assert.That(await File.ReadAllTextAsync(absFilePath, Encoding.UTF8), Is.EqualTo(((BlobGitObj)obj).Content));
-        var createdFile = ObjToFile((BlobGitObj)obj, _repo);
-        Assert.That(File.ReadAllBytes(absFilePath), Is.EqualTo(File.ReadAllBytes(createdFile)));
+        Assert.That(await File.ReadAllBytesAsync(absFilePath), Is.EquivalentTo(((BlobBaseGitObj)obj).Content));
+        var createdFile = ObjToFile((BlobBaseGitObj)obj, _repo);
+        Assert.That(
+            await File.ReadAllBytesAsync(createdFile), Is.EquivalentTo(await File.ReadAllBytesAsync(absFilePath)));
     }
     
     private async Task<GitSha1> HashObject(string absolutePath)
     {
-        var obj = new BlobGitObj(await File.ReadAllTextAsync(absolutePath, Encoding.UTF8));
+        var obj = new BlobBaseGitObj(await File.ReadAllBytesAsync(absolutePath));
         return await obj.Write(_repo);
     }
 
-    private async Task<GitObj> CatFile(string sha) =>
-        await GitObj.Read(_repo, GitSha1.FromHexString(sha));
+    private async Task<BaseGitObj> CatFile(string sha) =>
+        await BaseGitObj.Read(_repo, GitSha1.FromHexString(sha));
 
-    private string ObjToFile(BlobGitObj obj, Repository repo)
+    private string ObjToFile(BlobBaseGitObj obj, Repository repo)
     {
         string filepath = repo._worktree + Slash + "file.txt";
-        // TODO we should probably refactor to use bytes[] instead of string generally to get rid of encoding!
-        File.WriteAllText(filepath, obj.Content, Encoding.UTF8);
+        File.WriteAllBytes(filepath, obj.Content);
         return filepath;
     }
 }

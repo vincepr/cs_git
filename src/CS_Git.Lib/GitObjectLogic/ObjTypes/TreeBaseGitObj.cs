@@ -10,5 +10,11 @@ public record TreeBaseGitObj(byte[] Content) : BaseGitObj
     {
         throw new NotImplementedException();
     }
+
+    public override GitSha1 Hash()
+    {
+        throw new NotImplementedException();
+    }
+
     public override string ToString() => Encoding.UTF8.GetString(Content);
 }

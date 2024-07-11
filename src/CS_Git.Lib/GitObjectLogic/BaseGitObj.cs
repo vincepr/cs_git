@@ -27,6 +27,14 @@ namespace CS_Git.Lib.GitObjectLogic;
 
 public abstract record BaseGitObj
 {
+    /// <summary>
+    /// Read specific object found in repo at path the sha is pointing to.
+    /// </summary>
+    /// <param name="repo">Used git repository.</param>
+    /// <param name="sha">Used sha that identifies path to git-object-file.</param>
+    /// <returns>The git-object.</returns>
+    /// <exception cref="InvalidDataException">Encoded byte-length not as expected in header.</exception>
+    /// <exception cref="UnreachableException">Unknown type encountered in header.</exception>
     public static async Task<BaseGitObj> Read(Repository repo, GitSha1 sha)
     {
         await using var stream = repo.CreateRepoFileStreamReadonly("objects", sha.FolderName, sha.FileName);
@@ -78,5 +86,16 @@ public abstract record BaseGitObj
         };
     }
 
+    /// <summary>
+    /// Write the object to the repository. Path from the sha.
+    /// </summary>
+    /// <param name="repo">Used repository.</param>
+    /// <returns>Sha that identifies the git-object. Also used to identify path.</returns>
     public abstract Task<GitSha1> Write(Repository repo);
+    
+    /// <summary>
+    /// Calculate the sha for the git-object.
+    /// </summary>
+    /// <returns>Sha that identifies the object. Also used to identify path.</returns>
+    public abstract GitSha1 Hash();
 }

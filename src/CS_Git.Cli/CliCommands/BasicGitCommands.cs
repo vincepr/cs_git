@@ -33,15 +33,15 @@ public class BasicGitCommands
         [Option('t', Description = "Specify the type")] EnumGitObj type = EnumGitObj.blob,
         [Option('w', Description = "Actually write the object into the database")]bool write = false)
     {
-        if (write)
+        if (write == false)
+        {
+            Console.Write(await GitObjUtils.HashObject(path.AbsolutePath));
+        }
+        else
         {
             var repo = await Repository.FindRecursiveAndRead();
             var sha = await GitObjUtils.HashObject(repo, path.AbsolutePath);
             Console.WriteLine($"created file: '{sha.FolderName}/{sha.FileName}'");
-        }
-        else
-        {
-            Console.Write(await GitObjUtils.HashObject(path.AbsolutePath));
         }
     }
 

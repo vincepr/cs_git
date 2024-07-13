@@ -5,15 +5,23 @@ using CS_Git.Lib.Util;
 
 namespace CS_Git.Lib.GitObjectLogic.ObjTypes;
 
-public record BlobBaseGitObj(byte[] Content) : BaseGitObj
+public record BlobBaseGitObj : BaseGitObj
 {
     internal const string TypeName = "blob";
     
+    public byte[] Content { get; init; }
+    
+    /// <inheritdoc />
+    public BlobBaseGitObj(byte[] Content)
+    {
+        this.Content = Content;
+    }
+
     /// <inheritdoc />
     public override async Task<GitSha1> Write(Repository repo)
     {
-        var header = $"{TypeName} {Content.Length}\0";
-        var sha = GitSha1(header);
+         var header = $"{TypeName} {Content.Length}\0";
+        var sha = Hash();
 
         await using var stream = repo.CreateRepoFileStreamWriter("objects", sha.FolderName, sha.FileName);
         await using var writer = new ZLibStream(stream, CompressionMode.Compress);
@@ -26,16 +34,15 @@ public record BlobBaseGitObj(byte[] Content) : BaseGitObj
         return sha;
     }
 
-    /// <inheritdoc />
-    public override GitSha1 Hash() => GitSha1(header: $"{TypeName} {Content.Length}\0");
     
     /// <inheritdoc />
     public override string ToString() => Encoding.UTF8.GetString(Content);
     
-    private GitSha1 GitSha1(string header)
+    /// <inheritdoc />
+    public override GitSha1 Hash()
     {
-        var body = Encoding.UTF8.GetString(Content);
-        var combined = header + body;
+        var header = Encoding.ASCII.GetBytes($"{TypeName} {Content.Length}\0");
+        var combined = header.Concat(Content).ToArray();
         return new GitSha1(combined);
     }
 }

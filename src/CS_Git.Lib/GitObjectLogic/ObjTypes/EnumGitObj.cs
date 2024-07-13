@@ -1,4 +1,4 @@
-using System.Reflection.Metadata;
+// ReSharper disable InconsistentNaming
 
 namespace CS_Git.Lib.GitObjectLogic.ObjTypes;
 

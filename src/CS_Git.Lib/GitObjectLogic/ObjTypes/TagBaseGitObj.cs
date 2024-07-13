@@ -6,6 +6,7 @@ namespace CS_Git.Lib.GitObjectLogic.ObjTypes;
 public record TagBaseGitObj(byte[] Content) : BaseGitObj
 {
     internal const string TypeName = "tag";
+    
     public override Task<GitSha1> Write(Repository repo)
     {
         throw new NotImplementedException();

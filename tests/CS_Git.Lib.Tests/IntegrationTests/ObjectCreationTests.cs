@@ -50,6 +50,7 @@ public class ObjectCreationTests
     [TestCase("csharpfile_no_bom.cs")]
     [TestCase("csharpfile_with_bom.cs")] 
     [TestCase("jsonfile.json")]
+    [TestCase("README.md")]
     public async Task GitObj_WriteThenRead_ProducesSameString(string file)
     {
         // Arrange
@@ -75,6 +76,7 @@ public class ObjectCreationTests
     [TestCase("csharpfile_no_bom.cs")]
     [TestCase("csharpfile_with_bom.cs")]
     [TestCase("jsonfile.json")]
+    [TestCase("README.md")]
     public async Task GitObj_WriteThenRead_ProducesSameFile_ByteComparison(string file)
     {
         // Arrange

@@ -65,6 +65,7 @@ public class Repository
                                                repositoryformatversion = 0
                                                filemode = false
                                                bare = false
+                                               autocrlf = false
                                            """;
         var tempRepo = await New(path, force: true);
         

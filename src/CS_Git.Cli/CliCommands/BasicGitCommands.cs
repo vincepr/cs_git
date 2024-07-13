@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Cocona;
 using CS_Git.Cli.CliCommands.CoconaLogic;
+using CS_Git.Lib.GitObjectLogic;
 using CS_Git.Lib.GitObjectLogic.ObjTypes;
 using CS_Git.Lib.RepositoryLogic;
 
@@ -40,7 +41,7 @@ public class BasicGitCommands
         }
         else
         {
-            Console.WriteLine($"sha: {GitObjUtils.HashObject(path.AbsolutePath)}");
+            Console.Write(await GitObjUtils.HashObject(path.AbsolutePath));
         }
     }
 

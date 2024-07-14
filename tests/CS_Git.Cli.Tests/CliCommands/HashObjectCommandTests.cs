@@ -21,7 +21,7 @@ public class HashObjectCommandTests
 
     [TestCase("hashtestbinaryfile", "8c48471bdb782797a91d8fe3955a70131abc5150")]
     [TestCase("hashtestfile", "a8dae722a40f0a5e293274d952c181e94129cbbf")]
-    [TestCase("README.md", "d7f17bdb602afc4309895f828780d98bc226293a")]
+    [TestCase("markdown.md", "b172ea17494507efecb4bc1e7f6e9c535a1025fd")]
     // auto crlf might fuck these tests up. As some of these test files might have 'other' line-endings.
     // So if README.md breaks, autocrlf probably touched the readme.
     public async Task Textfile_GitHashed_ProducesExpectedHash(string file, string expectedHash)
@@ -36,9 +36,11 @@ public class HashObjectCommandTests
     
     [TestCase("hashtestbinaryfile")]
     [TestCase("hashtestfile")]
-    // [TestCase("README.md")]   auto-crlf touches this. git config core.autocrlf = false will make this pass
-    // hash with crlf = false                       hash with crlf = true
-    // 482751db402bd760793b1237086e94535e8afa94 vs d7f17bdb602afc4309895f828780d98bc226293a
+    [TestCase("markdown.md")]   
+    // these tests are volatile with auto-crlf and windows. git hash-object will touch files and 'fix them' before hasning
+    // thus can change files virtually then hash the changed files. And save those changed files as objects. But og file doesnt get mutated here.
+    // ex:  git config core.autocrlf = false            git config core.autocrlf = true
+    // 482751db402bd760793b1237086e94535e8afa94         vs d7f17bdb602afc4309895f828780d98bc226293a
     public async Task ProducesEqualHash_Git_CsGit(string file)
     {
         // Arrange

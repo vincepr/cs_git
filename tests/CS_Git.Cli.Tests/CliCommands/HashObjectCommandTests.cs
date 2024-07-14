@@ -21,7 +21,7 @@ public class HashObjectCommandTests
 
     [TestCase("hashtestbinaryfile", "8c48471bdb782797a91d8fe3955a70131abc5150")]
     [TestCase("hashtestfile", "a8dae722a40f0a5e293274d952c181e94129cbbf")]
-    [TestCase("markdown.md", "b172ea17494507efecb4bc1e7f6e9c535a1025fd")]
+    [TestCase("markdown.md", "d403e0a5468a484dd11440f1031e2bad70db463f")]
     // auto crlf might fuck these tests up. As some of these test files might have 'other' line-endings.
     // So if README.md breaks, autocrlf probably touched the readme.
     public async Task Textfile_GitHashed_ProducesExpectedHash(string file, string expectedHash)

@@ -25,6 +25,6 @@ public static class GitObjUtils
     public static async Task<GitSha1> HashObject(Repository repo, string absolutePath)
     {
         var obj = new BlobBaseGitObj(await File.ReadAllBytesAsync(absolutePath));
-        return await obj.Write(repo);
+        return await obj.Serialize(repo);
     }
 }

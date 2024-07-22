@@ -9,18 +9,13 @@ public record BlobBaseGitObj : BaseGitObj
 {
     internal const string TypeName = "blob";
     
-    public byte[] Content { get; init; }
-    
-    /// <inheritdoc />
-    public BlobBaseGitObj(byte[] Content)
+    public BlobBaseGitObj(byte[] Content) : base(Content)
     {
-        this.Content = Content;
     }
 
-    /// <inheritdoc />
-    public override async Task<GitSha1> Write(Repository repo)
+    public override async Task<GitSha1> Serialize(Repository repo)
     {
-         var header = $"{TypeName} {Content.Length}\0";
+        var header = $"{TypeName} {Content.Length}\0";
         var sha = Hash();
 
         await using var stream = repo.CreateRepoFileStreamWriter("objects", sha.FolderName, sha.FileName);
@@ -33,16 +28,8 @@ public record BlobBaseGitObj : BaseGitObj
         
         return sha;
     }
-
     
-    /// <inheritdoc />
     public override string ToString() => Encoding.UTF8.GetString(Content);
-    
-    /// <inheritdoc />
-    public override GitSha1 Hash()
-    {
-        var header = Encoding.ASCII.GetBytes($"{TypeName} {Content.Length}\0");
-        var combined = header.Concat(Content).ToArray();
-        return new GitSha1(combined);
-    }
+
+    public override GitSha1 Hash() => HashBaseImplementation(TypeName, Content);
 }

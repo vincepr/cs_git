@@ -4,33 +4,43 @@ namespace CS_Git.Lib.GitObjectLogic;
 
 public struct GitSha1
 {
-    public string FolderName;
-    public string FileName;
+    /// <summary>
+    /// Not the bytes hashed but the hash stored in bytes.
+    /// </summary>
+    public readonly byte[] HashAsBytes { get; init; }
+    public string HashAsString { get; init; }
+    public string FolderName => HashAsString[..2];
+    public string FileName => HashAsString[2..];
     
     private const int ExpectedLength = 40;
     
     public GitSha1(byte[] content)
     {
-        var sha = Convert.ToHexString(SHA1.HashData(content)).ToLower();
+        var bytes = SHA1.HashData(content);
+        var sha = Convert.ToHexString(bytes).ToLower();
         CheckExpectedLength(content, sha);
-        FolderName = sha[..2];
-        FileName = sha[2..];
+        HashAsBytes = content;
+        HashAsString = sha;
     }
     
 
-    private void CheckExpectedLength<T>(T data, string sha)
+    private static void CheckExpectedLength<T>(T data, string sha)
     {
         if (sha.Length != ExpectedLength) 
             throw new ArgumentOutOfRangeException(
                 $"{nameof(data)}", $"Expected length of {ExpectedLength}, got {sha.Length}. from:[{data}] -> to:[{sha}]");
     }
 
-    public static GitSha1 FromHexString(string shaHexString) =>
-        new()
+    public static GitSha1 FromHexString(string shaHexString)
+    {
+        var data = Convert.FromHexString(shaHexString);
+        CheckExpectedLength(data, shaHexString);
+        return new GitSha1
         {
-            FolderName = shaHexString[..2],
-            FileName = shaHexString[2..]
+            HashAsString = shaHexString,
+            HashAsBytes = data,
         };
+    }
 
-    public override string ToString() => $"{FolderName}{FileName}";
+    public override string ToString() => HashAsString;
 }

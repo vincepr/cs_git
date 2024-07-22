@@ -97,7 +97,7 @@ public class ObjectCreationTests
     private async Task<GitSha1> HashObject(string absolutePath)
     {
         var obj = new BlobBaseGitObj(await File.ReadAllBytesAsync(absolutePath));
-        return await obj.Write(_repo);
+        return await obj.Serialize(_repo);
     }
 
     private async Task<BaseGitObj> CatFile(string sha) =>

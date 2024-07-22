@@ -67,6 +67,10 @@ public class BasicGitCommands
                     $"argument type:{type} not matching found git-object-type: {nameof(obj)}");
         }
 
+        var x = (CommitBaseGitObj)obj;
+        var y = x.SerializeToUtf8();
+        Console.WriteLine(y);
+
         Console.WriteLine(obj.ToString());
     }
 }

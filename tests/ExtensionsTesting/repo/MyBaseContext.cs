@@ -6,6 +6,7 @@ namespace ExtensionsTesting.repo;
 
 public class MyBaseContext : DbContext
 {
+    public MyBaseContext(DbContextOptions options): base(options) { }
     public DbSet<Article> Articles { get; set; }
 
 }

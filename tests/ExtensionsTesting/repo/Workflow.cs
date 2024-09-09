@@ -26,11 +26,11 @@ public class Workflow
             // handle set logic:
             foreach (var set in baseArticle.Sets)
             {
-                if (dbArticle.SetArticleExists(set.Ean))
+                if (dbArticle.SetArticleExists(set))
                 {
                     if (dbArticle.IsLegacySetWithMissingComposition(set))
                     {
-                        _logger.LogInformation("Adding new SetComposition: {} for BaseArticle: {BaseEan}", set.Ean, baseArticle.Ean);
+                        _logger.LogInformation("Adding new SetComposition: {ean} for BaseArticle: {BaseEan}", set.Ean, baseArticle.Ean);
                         dbArticle.AddSetOnly(set);
                     }
                     
@@ -89,7 +89,7 @@ public abstract class BaseArticle
 {
     public abstract Task SaveToDb();
 
-    public abstract bool SetArticleExists(string setEan);
+    public abstract bool SetArticleExists(ApiSet set);
     public abstract void AddSetOnly(ApiSet set);
 
     public abstract void UpdateOrAddSetArticle(ApiSet set);
@@ -120,9 +120,9 @@ public class ActualBaseArticle : BaseArticle
     {
         return _context.SaveChangesAsync();
     }
-    public override bool SetArticleExists(string setEan)
+    public override bool SetArticleExists(ApiSet setFromAPi)
     {
-        return _baseArticle.ContainedInSets.Any(set => set.BaseArticle.Ean == setEan);
+        return _baseArticle.ContainedInSets.Any(set => set.BaseArticle.Ean == setFromAPi.Ean);
     }
     public override void AddSetOnly(ApiSet set)
     {
